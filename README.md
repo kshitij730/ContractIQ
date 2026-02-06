@@ -4,6 +4,12 @@
 
 ---
 
+## 🌐 Live Deployment
+- **Frontend**: [contract-iq.vercel.app](https://contract-cahqhaft6-kshitij730s-projects.vercel.app/)
+- **Backend API**: [huggingface.co/spaces/kshitij230/contract-iq-api](https://kshitij230-contract-iq-api.hf.space)
+
+---
+
 ## 🧠 Core Intelligence System
 
 ContractIQ operates on a unique **Triple-Layer Analysis Architecture** that ensures no risky clause goes undetected.
@@ -60,7 +66,7 @@ Powered by **Groq (Llama-3.3-70b)**, our reasoning layer provides the "Why" and 
 - **Groq API**: Large Language Model orchestration for reasoning.
 - **Uvicorn**: Lighting-fast ASGI server.
 
-### **Frontend (Next.js 14)**
+### **Frontend (Next.js 16)**
 - **Next.js (App Router)**: React framework with server-side rendering capability.
 - **Framer Motion**: For production-grade animations and gesture handling.
 - **Lucide React**: Holistic set of beautifully crafted open-source icons.
@@ -108,13 +114,13 @@ ContractAI/
 ```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate
+venv\Scripts\activate  # Windows
+source venv/bin/activate  # macOS/Linux
 pip install -r requirements.txt
 ```
 
-**Frontend:**
+**Frontend (Root):**
 ```bash
-cd frontend
 npm install
 npm run dev
 ```
