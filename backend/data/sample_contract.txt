@@ -1,0 +1,10 @@
+SERVICE AGREEMENT
+
+This Agreement is made on Feb 5, 2024, between TechCorp (Client) and DevStudio (Contractor).
+
+1. SERVICES. Contractor will build a web application.
+2. PAYMENT. Client shall pay Contractor $50 per hour. Payment is due within 90 days of invoice receipt.
+3. TERMINATION. Client may terminate this agreement immediately without notice for any reason. Contractor must provide 30 days notice.
+4. INTELLECTUAL PROPERTY. Client owns all work product, including pre-existing IP of Contractor incorporated into the work, forever and globally.
+5. LIABILITY. Contractor’s liability is unlimited for any damages caused. Client’s liability is limited to $100.
+6. JURISDICTION. This agreement is governed by the laws of Mars.
