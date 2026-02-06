@@ -1,11 +1,25 @@
 {
-    "name": "contract-iq",
+    "name": "contract-iq-root",
     "version": "1.0.0",
     "private": true,
-    "dependencies": {
-        "next": "15.1.0"
-    },
     "scripts": {
-        "build": "cd frontend && npm install && next build"
+        "build": "cd frontend && next build"
+    },
+    "dependencies": {
+        "clsx": "^2.1.1",
+        "framer-motion": "^12.33.0",
+        "lucide-react": "^0.563.0",
+        "next": "15.1.0",
+        "react": "19.0.0",
+        "react-dom": "19.0.0",
+        "tailwind-merge": "^3.4.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "eslint": "^9",
+        "eslint-config-next": "15.1.0",
+        "typescript": "^5"
     }
 }
