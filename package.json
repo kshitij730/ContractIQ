@@ -1,9 +1,12 @@
 {
-    "name": "contract-iq-root",
-    "version": "1.0.0",
+    "name": "contract-iq",
+    "version": "0.1.0",
     "private": true,
     "scripts": {
-        "build": "cd frontend && next build"
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "eslint"
     },
     "dependencies": {
         "clsx": "^2.1.1",

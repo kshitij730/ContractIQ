@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Header } from "../components/Header";
-import { Hero } from "../components/Hero";
-import { Features } from "../components/Features";
-import { Footer } from "../components/Footer";
-import { UploadZone } from "../components/UploadZone";
-import { ContextInput } from "../components/ContextInput";
-import { LoadingScreen } from "../components/LoadingScreen";
-import { Dashboard } from "../components/Dashboard";
-import { HistorySidebar, saveToHistory } from "../components/HistorySidebar";
+import { Header } from "@/components/Header";
+import { Hero } from "@/components/Hero";
+import { Features } from "@/components/Features";
+import { Footer } from "@/components/Footer";
+import { UploadZone } from "@/components/UploadZone";
+import { ContextInput } from "@/components/ContextInput";
+import { LoadingScreen } from "@/components/LoadingScreen";
+import { Dashboard } from "@/components/Dashboard";
+import { HistorySidebar, saveToHistory } from "@/components/HistorySidebar";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ArrowLeft, Sparkles } from "lucide-react";
 
