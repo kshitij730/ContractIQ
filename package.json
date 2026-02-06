@@ -6,7 +6,6 @@
         "next": "15.1.0"
     },
     "scripts": {
-        "build": "next build",
-        "install": "npm install"
+        "build": "cd frontend && next build"
     }
 }
