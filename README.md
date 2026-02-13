@@ -5,7 +5,7 @@
 ---
 
 ## 🌐 Live Deployment
-- **Frontend**: [contract-iq.vercel.app](https://contract-cahqhaft6-kshitij730s-projects.vercel.app/)
+- **Frontend**: [https://contract-iq-xi.vercel.app/](https://contract-iq-xi.vercel.app/)
 - **Backend API**: [huggingface.co/spaces/kshitij230/contract-iq-api](https://kshitij230-contract-iq-api.hf.space)
 
 ---
