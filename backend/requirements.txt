@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 python-multipart
+pypdf
 sqlalchemy
 alembic
 celery

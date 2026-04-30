@@ -63,10 +63,10 @@ export function Hero({ onStart }: HeroProps) {
                             letterSpacing: '-0.03em'
                         }}
                     >
-                        Don't sign what you{' '}
+                        Don&apos;t sign what you{' '}
                         <br />
                         <span className="text-gradient">
-                            don't understand.
+                            don&apos;t understand.
                         </span>
                     </motion.h1>
 

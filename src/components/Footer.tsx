@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Shield, Heart } from "lucide-react";
 
 export function Footer() {
@@ -51,7 +50,7 @@ export function Footer() {
                             color: '#64748b',
                             lineHeight: '1.6'
                         }}>
-                            AI-powered contract analysis for freelancers and small businesses who can't afford expensive legal reviews.
+                            AI-powered contract analysis for freelancers and small businesses who can&apos;t afford expensive legal reviews.
                         </p>
                     </div>
 

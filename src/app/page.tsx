@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
@@ -26,6 +26,10 @@ interface AnalysisResult {
   contract_summary: string;
   explanation?: string;
   negotiation_email?: string;
+}
+
+interface HistoryItem {
+  id: string;
 }
 
 export default function Home() {
@@ -105,7 +109,7 @@ export default function Home() {
       const saved = localStorage.getItem('contractiq_history');
       if (saved) {
         const history = JSON.parse(saved);
-        const item = history.find((h: any) => h.id === id);
+        const item = history.find((h: HistoryItem) => h.id === id);
         if (item) {
           alert("This is an older history item without full details. Only newer analyses can be reloaded fully.");
         }
@@ -302,8 +306,10 @@ export default function Home() {
             <Dashboard
               score={result.score}
               risks={result.risks}
+              contractSummary={result.contract_summary}
               explanation={result.explanation || "No explanation available."}
               email={result.negotiation_email || "No email generated."}
+              userExplanation={explanation}
               onReset={resetAnalysis}
             />
           )}

@@ -5,18 +5,28 @@ import { RiskCard } from "./RiskCard";
 import { ChatBot } from "./Chatbot";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import { ExportMenu } from "./ExportMenu";
-import { Gauge, Copy, BookOpen, Send, ArrowLeft, CheckCircle2, Search, Filter, Sparkles, AlertTriangle } from "lucide-react";
+import { Gauge, Copy, BookOpen, Send, ArrowLeft, CheckCircle2, Search, Sparkles, AlertTriangle } from "lucide-react";
 import { useState } from "react";
+
+interface Risk {
+    category: string;
+    severity: string;
+    finding: string;
+    expectation_check: string;
+    confidence?: number;
+}
 
 interface DashboardProps {
     score: number;
-    risks: any[];
+    risks: Risk[];
+    contractSummary: string;
     explanation: string;
     email: string;
+    userExplanation: string;
     onReset: () => void;
 }
 
-export function Dashboard({ score, risks, explanation, email, onReset }: DashboardProps) {
+export function Dashboard({ score, risks, contractSummary, explanation, email, userExplanation, onReset }: DashboardProps) {
     const [copied, setCopied] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [filterSeverity, setFilterSeverity] = useState("all");
@@ -74,7 +84,7 @@ export function Dashboard({ score, risks, explanation, email, onReset }: Dashboa
                             Analysis Report
                         </h1>
                         <p style={{ fontSize: '1rem', color: '#94a3b8' }}>
-                            Here's what we found in your contract
+                            Here&apos;s what we found in your contract
                         </p>
                     </div>
 
@@ -163,13 +173,13 @@ export function Dashboard({ score, risks, explanation, email, onReset }: Dashboa
                         </div>
                     </div>
                 </motion.div>
-                <div style={{
+                <div className="dashboard-grid" style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(12, 1fr)',
                     gap: '2rem'
                 }}>
                     {/* Left Sidebar - Score & Risks */}
-                    <div style={{ gridColumn: 'span 4' }}>
+                    <div className="dashboard-sidebar" style={{ gridColumn: 'span 4' }}>
                         <div
                             className="custom-scrollbar"
                             style={{
@@ -250,9 +260,9 @@ export function Dashboard({ score, risks, explanation, email, onReset }: Dashboa
                                     fontSize: '0.875rem',
                                     color: '#94a3b8'
                                 }}>
-                                    {score > 80 && "✅ Low risk - Contract looks fair"}
-                                    {score > 50 && score <= 80 && "⚠️ Medium risk - Review carefully"}
-                                    {score <= 50 && "🚨 High risk - Negotiate changes"}
+                                    {score > 80 && "Low risk - Contract looks fair"}
+                                    {score > 50 && score <= 80 && "Medium risk - Review carefully"}
+                                    {score <= 50 && "High risk - Negotiate changes"}
                                 </div>
                             </motion.div>
 
@@ -334,6 +344,26 @@ export function Dashboard({ score, risks, explanation, email, onReset }: Dashboa
                                                 }}
                                             />
                                         </div>
+                                        <select
+                                            value={filterSeverity}
+                                            onChange={(e) => setFilterSeverity(e.target.value)}
+                                            aria-label="Filter risks by severity"
+                                            style={{
+                                                background: 'rgba(255, 255, 255, 0.05)',
+                                                border: '1px solid rgba(148, 163, 184, 0.1)',
+                                                borderRadius: '6px',
+                                                padding: '0.4rem 0.5rem',
+                                                fontSize: '0.75rem',
+                                                color: 'white',
+                                                outline: 'none'
+                                            }}
+                                        >
+                                            <option value="all">All</option>
+                                            <option value="critical">Critical</option>
+                                            <option value="severe">Severe</option>
+                                            <option value="high">High</option>
+                                            <option value="medium">Medium</option>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -373,7 +403,7 @@ export function Dashboard({ score, risks, explanation, email, onReset }: Dashboa
                     </div>
 
                     {/* Main Content - AI Assessment & Actions */}
-                    <div style={{ gridColumn: 'span 8' }}>
+                    <div className="dashboard-main" style={{ gridColumn: 'span 8' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                             {/* AI Assessment */}
                             <motion.div
@@ -530,7 +560,16 @@ export function Dashboard({ score, risks, explanation, email, onReset }: Dashboa
                             </motion.div>
 
                             {/* AI Chatbot */}
-                            <ChatBot />
+                            <ChatBot
+                                analysis={{
+                                    score,
+                                    risks,
+                                    contract_summary: contractSummary,
+                                    explanation,
+                                    negotiation_email: email
+                                }}
+                                userExplanation={userExplanation}
+                            />
                         </div>
                     </div>
                 </div>

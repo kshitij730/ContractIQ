@@ -1,122 +1,116 @@
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
+﻿from datetime import datetime
+from html import escape
+from pathlib import Path
+
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
-from datetime import datetime
-import os
+from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
+
+def _paragraphs(text: str):
+    for paragraph in (text or "").split("\n"):
+        cleaned = paragraph.strip()
+        if cleaned:
+            yield escape(cleaned).replace("**", "")
+
 
 def generate_pdf_report(score: int, risks: list, explanation: str, negotiation_email: str) -> str:
-    """Generate a PDF report of the contract analysis"""
-    
-    # Create reports directory
-    reports_dir = "backend/data/reports"
-    os.makedirs(reports_dir, exist_ok=True)
-    
-    # Generate filename with timestamp
+    """Generate a PDF report of the contract analysis."""
+    reports_dir = Path("backend/data/reports")
+    reports_dir.mkdir(parents=True, exist_ok=True)
+
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    pdf_path = f"{reports_dir}/ContractIQ_Report_{timestamp}.pdf"
-    
-    # Create PDF
-    doc = SimpleDocTemplate(pdf_path, pagesize=letter)
+    pdf_path = reports_dir / f"ContractIQ_Report_{timestamp}.pdf"
+
+    doc = SimpleDocTemplate(str(pdf_path), pagesize=letter, rightMargin=48, leftMargin=48, topMargin=48, bottomMargin=48)
     story = []
     styles = getSampleStyleSheet()
-    
-    # Custom styles
+
     title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
+        "ContractIQTitle",
+        parent=styles["Heading1"],
         fontSize=24,
-        textColor=colors.HexColor('#6366f1'),
-        spaceAfter=30,
-        alignment=TA_CENTER
+        textColor=colors.HexColor("#4f46e5"),
+        spaceAfter=24,
+        alignment=TA_CENTER,
     )
-    
     heading_style = ParagraphStyle(
-        'CustomHeading',
-        parent=styles['Heading2'],
+        "ContractIQHeading",
+        parent=styles["Heading2"],
         fontSize=16,
-        textColor=colors.HexColor('#1e293b'),
+        textColor=colors.HexColor("#1e293b"),
         spaceAfter=12,
-        spaceBefore=20
+        spaceBefore=18,
     )
-    
-    # Title
+    body_style = ParagraphStyle(
+        "ContractIQBody",
+        parent=styles["BodyText"],
+        fontSize=10.5,
+        leading=15,
+        spaceAfter=8,
+    )
+    footer_style = ParagraphStyle(
+        "ContractIQFooter",
+        parent=styles["BodyText"],
+        fontSize=8.5,
+        textColor=colors.grey,
+        alignment=TA_CENTER,
+    )
+
     story.append(Paragraph("ContractIQ Analysis Report", title_style))
-    story.append(Paragraph(f"Generated on {datetime.now().strftime('%B %d, %Y at %I:%M %p')}", styles['Normal']))
-    story.append(Spacer(1, 0.3*inch))
-    
-    # Score Section
-    score_color = colors.HexColor('#10b981') if score > 80 else (colors.HexColor('#f59e0b') if score > 50 else colors.HexColor('#ef4444'))
-    
+    story.append(Paragraph(f"Generated on {datetime.now().strftime('%B %d, %Y at %I:%M %p')}", body_style))
+    story.append(Spacer(1, 0.25 * inch))
+
+    score_color = colors.HexColor("#10b981") if score > 80 else colors.HexColor("#f59e0b") if score > 50 else colors.HexColor("#ef4444")
     story.append(Paragraph("Safety Score", heading_style))
-    score_data = [[f"{score}/100"]]
-    score_table = Table(score_data, colWidths=[2*inch])
+    score_table = Table([[f"{score}/100"]], colWidths=[2.1 * inch])
     score_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), score_color),
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.white),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 36),
-        ('PADDING', (0, 0), (-1, -1), 20),
+        ("BACKGROUND", (0, 0), (-1, -1), score_color),
+        ("TEXTCOLOR", (0, 0), (-1, -1), colors.white),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, -1), 34),
+        ("PADDING", (0, 0), (-1, -1), 18),
     ]))
     story.append(score_table)
-    story.append(Spacer(1, 0.3*inch))
-    
-    # Interpretation
+
     if score > 80:
-        interpretation = "✓ Low Risk - Contract appears fair and balanced"
+        interpretation = "Low Risk - Contract appears relatively fair and balanced."
     elif score > 50:
-        interpretation = "⚠ Medium Risk - Review carefully before signing"
+        interpretation = "Medium Risk - Review and negotiate the flagged items before signing."
     else:
-        interpretation = "✗ High Risk - Strongly recommend negotiation"
-    
-    story.append(Paragraph(interpretation, styles['Normal']))
-    story.append(Spacer(1, 0.4*inch))
-    
-    # Risks Section
+        interpretation = "High Risk - Strongly consider negotiation and professional legal review."
+    story.append(Spacer(1, 0.2 * inch))
+    story.append(Paragraph(interpretation, body_style))
+
+    story.append(Paragraph(f"Identified Risks ({len(risks)})", heading_style))
     if risks:
-        story.append(Paragraph(f"Identified Risks ({len(risks)})", heading_style))
-        
         for i, risk in enumerate(risks, 1):
-            risk_text = f"<b>{i}. {risk['category']}</b> ({risk['severity']})<br/>"
-            risk_text += f"{risk['finding']}<br/>"
-            risk_text += f"<i>Reality Check: {risk['expectation_check']}</i>"
-            story.append(Paragraph(risk_text, styles['Normal']))
-            story.append(Spacer(1, 0.2*inch))
-    
+            risk_text = (
+                f"<b>{i}. {escape(str(risk.get('category', 'Unknown')))}</b> "
+                f"({escape(str(risk.get('severity', 'Unknown')))}):<br/>"
+                f"{escape(str(risk.get('finding', '')))}<br/>"
+                f"<i>Reality Check: {escape(str(risk.get('expectation_check', 'Review needed')))}</i>"
+            )
+            story.append(Paragraph(risk_text, body_style))
+    else:
+        story.append(Paragraph("No major risks were identified by the current analysis.", body_style))
+
     story.append(PageBreak())
-    
-    # AI Assessment
     story.append(Paragraph("AI Assessment", heading_style))
-    for paragraph in explanation.split('\n'):
-        if paragraph.strip():
-            story.append(Paragraph(paragraph, styles['Normal']))
-            story.append(Spacer(1, 0.1*inch))
-    
-    story.append(Spacer(1, 0.3*inch))
-    
-    # Negotiation Strategy
+    for paragraph in _paragraphs(explanation):
+        story.append(Paragraph(paragraph, body_style))
+
     story.append(Paragraph("Negotiation Strategy", heading_style))
-    for paragraph in negotiation_email.split('\n'):
-        if paragraph.strip():
-            story.append(Paragraph(paragraph, styles['Normal']))
-            story.append(Spacer(1, 0.1*inch))
-    
-    # Footer
-    story.append(Spacer(1, 0.5*inch))
-    footer_style = ParagraphStyle(
-        'Footer',
-        parent=styles['Normal'],
-        fontSize=9,
-        textColor=colors.grey,
-        alignment=TA_CENTER
-    )
-    story.append(Paragraph("Generated by ContractIQ - AI-Powered Contract Analysis", footer_style))
-    story.append(Paragraph("This report is for informational purposes only and does not constitute legal advice.", footer_style))
-    
-    # Build PDF
+    for paragraph in _paragraphs(negotiation_email):
+        story.append(Paragraph(paragraph, body_style))
+
+    story.append(Spacer(1, 0.4 * inch))
+    story.append(Paragraph("Generated by ContractIQ - AI-powered contract analysis", footer_style))
+    story.append(Paragraph("This report is informational and does not constitute legal advice.", footer_style))
+
     doc.build(story)
-    
-    return pdf_path
+    return str(pdf_path)

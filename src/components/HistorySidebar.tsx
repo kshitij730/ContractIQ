@@ -12,6 +12,20 @@ interface AnalysisHistory {
     summary: string;
 }
 
+interface FullAnalysisData {
+    score: number;
+    risks: Array<{
+        category: string;
+        severity: string;
+        finding: string;
+        expectation_check: string;
+        confidence?: number;
+    }>;
+    contract_summary: string;
+    explanation?: string;
+    negotiation_email?: string;
+}
+
 interface HistorySidebarProps {
     isOpen: boolean;
     onClose: () => void;
@@ -25,7 +39,7 @@ export function HistorySidebar({ isOpen, onClose, onLoadHistory }: HistorySideba
         // Load history from localStorage
         const saved = localStorage.getItem('contractiq_history');
         if (saved) {
-            setHistory(JSON.parse(saved));
+            queueMicrotask(() => setHistory(JSON.parse(saved)));
         }
     }, [isOpen]); // Reload when side bar opens
 
@@ -299,7 +313,7 @@ export function HistorySidebar({ isOpen, onClose, onLoadHistory }: HistorySideba
 }
 
 // Helper function to save analysis to history
-export function saveToHistory(fileName: string, score: number, summary: string, fullData: any) {
+export function saveToHistory(fileName: string, score: number, summary: string, fullData: FullAnalysisData) {
     const id = Date.now().toString();
     const historyItem: AnalysisHistory = {
         id: id,

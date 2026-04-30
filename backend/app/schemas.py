@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+﻿from pydantic import BaseModel
 from typing import List, Optional
 
 class RiskItem(BaseModel):
@@ -6,6 +6,7 @@ class RiskItem(BaseModel):
     severity: str
     finding: str
     expectation_check: str
+    confidence: Optional[float] = None
 
 class AnalysisResult(BaseModel):
     score: int
@@ -19,3 +20,11 @@ class UserExpectation(BaseModel):
 
 class AnalysisResponse(BaseModel):
     analysis: AnalysisResult
+
+class ChatRequest(BaseModel):
+    question: str
+    analysis: AnalysisResult
+    user_explanation: Optional[str] = None
+
+class ChatResponse(BaseModel):
+    answer: str

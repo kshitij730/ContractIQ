@@ -14,6 +14,17 @@ const steps = [
     { icon: Sparkles, text: "Generating AI insights...", color: "#f59e0b" },
 ];
 
+const particles = Array.from({ length: 20 }, (_, i) => {
+    const hue = 240 + ((i * 23) % 60);
+    return {
+        id: i,
+        left: `${(i * 37) % 100}%`,
+        duration: 3 + (i % 5) * 0.35,
+        delay: (i % 7) * 0.25,
+        color: `hsl(${hue}, 70%, 60%)`,
+    };
+});
+
 export function LoadingScreen({ step }: LoadingScreenProps) {
     const currentStepIndex = steps.findIndex(s => step.includes(s.text.split('...')[0]));
     const activeStep = currentStepIndex >= 0 ? currentStepIndex : 0;
@@ -38,29 +49,29 @@ export function LoadingScreen({ step }: LoadingScreenProps) {
         >
             {/* Animated Background Particles */}
             <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-                {[...Array(20)].map((_, i) => (
+                {particles.map((particle) => (
                     <motion.div
-                        key={i}
+                        key={particle.id}
                         animate={{
                             y: [0, -1000],
                             opacity: [0, 1, 0],
                             scale: [0, 1, 0]
                         }}
                         transition={{
-                            duration: 3 + Math.random() * 2,
+                            duration: particle.duration,
                             repeat: Infinity,
-                            delay: Math.random() * 2,
+                            delay: particle.delay,
                             ease: "easeInOut"
                         }}
                         style={{
                             position: 'absolute',
-                            left: `${Math.random() * 100}%`,
+                            left: particle.left,
                             top: '100%',
                             width: '4px',
                             height: '4px',
                             borderRadius: '50%',
-                            background: `hsl(${240 + Math.random() * 60}, 70%, 60%)`,
-                            boxShadow: `0 0 10px hsl(${240 + Math.random() * 60}, 70%, 60%)`
+                            background: particle.color,
+                            boxShadow: `0 0 10px ${particle.color}`
                         }}
                     />
                 ))}

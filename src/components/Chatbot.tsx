@@ -15,7 +15,26 @@ interface Message {
     content: string;
 }
 
-export function ChatBot() {
+interface Risk {
+    category: string;
+    severity: string;
+    finding: string;
+    expectation_check: string;
+    confidence?: number;
+}
+
+interface ChatBotProps {
+    analysis: {
+        score: number;
+        risks: Risk[];
+        contract_summary: string;
+        explanation?: string;
+        negotiation_email?: string;
+    };
+    userExplanation?: string;
+}
+
+export function ChatBot({ analysis, userExplanation = "" }: ChatBotProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
         {
@@ -43,25 +62,33 @@ export function ChatBot() {
         setInput("");
         setIsTyping(true);
 
-        // Simulate AI response (in production, call your backend)
-        setTimeout(() => {
-            let response = "";
+        try {
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            const res = await fetch(`${baseUrl}/api/v1/chat`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    question: messageText,
+                    analysis,
+                    user_explanation: userExplanation,
+                }),
+            });
 
-            if (messageText.toLowerCase().includes("net 90")) {
-                response = "Net 90 means the client has 90 days to pay you after receiving your invoice. This is quite long and can hurt your cash flow. Industry standard is usually Net 30 (30 days). You should negotiate for shorter payment terms.";
-            } else if (messageText.toLowerCase().includes("hidden risks") || messageText.toLowerCase().includes("ai detect")) {
-                response = "I use a hybrid of Rule-Based and Machine Learning (ML) analysis. While rules find specific terms, my Semantic Analysis Transformer model 'understands' the meaning of sentences. It detects risks that don't use exact keywords by comparing them to thousands of known risky clauses using high-dimensional vector embeddings.";
-            } else if (messageText.toLowerCase().includes("terminate")) {
-                response = "If the contract allows the client to 'terminate immediately without notice,' it means they can end the agreement at any time without warning or reason. This is very risky for you as a contractor because you have no job security. You should negotiate for at least 14-30 days notice.";
-            } else if (messageText.toLowerCase().includes("unlimited liability")) {
-                response = "Unlimited liability means there's no cap on how much you could be held financially responsible for if something goes wrong. This is extremely risky! You could lose personal assets. Always negotiate for a liability cap (e.g., limited to the contract value or a specific dollar amount).";
-            } else {
-                response = "That's a great question! Based on the contract analysis, I recommend reviewing the specific clause in question. If you need more detailed legal advice, consider consulting with a contract attorney. Is there a specific section of the contract you'd like me to explain?";
+            if (!res.ok) {
+                throw new Error("Chat request failed");
             }
 
-            setMessages(prev => [...prev, { role: "assistant", content: response }]);
+            const data = await res.json();
+            setMessages(prev => [...prev, { role: "assistant", content: data.answer }]);
+        } catch (err) {
+            console.error(err);
+            setMessages(prev => [...prev, {
+                role: "assistant",
+                content: "I could not reach the contract chat service right now. Please try again in a moment."
+            }]);
+        } finally {
             setIsTyping(false);
-        }, 1500);
+        }
     };
 
     return (

@@ -12,8 +12,6 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
         return lines.map((line, index) => {
             if (!line.trim()) return <br key={index} />;
 
-            // Process inline markdown
-            let processedLine = line;
             const elements: React.ReactNode[] = [];
             let lastIndex = 0;
 

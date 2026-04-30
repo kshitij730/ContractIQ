@@ -275,4 +275,39 @@ h6 {
   .container {
     padding: 0 var(--space-md);
   }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  .dashboard-sidebar,
+  .dashboard-main {
+    grid-column: span 1 !important;
+  }
+
+  .dashboard-sidebar .custom-scrollbar {
+    position: static !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-right: 0 !important;
+  }
+
+  .glass-panel {
+    border-radius: 1rem;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .container {
+    padding: 0 1rem;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
 }

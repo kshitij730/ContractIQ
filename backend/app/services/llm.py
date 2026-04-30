@@ -1,5 +1,4 @@
-import os
-from groq import Groq
+﻿from groq import Groq
 from app.core.config import settings
 
 class LLMService:
@@ -8,17 +7,16 @@ class LLMService:
         if settings.GROQ_API_KEY and settings.GROQ_API_KEY != "your_groq_api_key_here":
             try:
                 self.client = Groq(api_key=settings.GROQ_API_KEY)
-                print("✅ Groq API initialized successfully")
+                print("Groq API initialized successfully")
             except Exception as e:
-                print(f"⚠️ Groq API initialization failed: {e}")
+                print(f"Groq API initialization failed: {e}")
         else:
-            print("⚠️ GROQ_API_KEY not set. Using mock responses.")
+            print("GROQ_API_KEY not set. Using local fallback responses.")
 
     def generate_explanation(self, risk_data: dict, user_explanation: str) -> str:
         if not self.client:
-            # Enhanced mock response
             return self._generate_mock_explanation(risk_data, user_explanation)
-        
+
         try:
             prompt = f"""You are an expert legal advisor helping freelancers and small business owners understand contract risks.
 
@@ -36,25 +34,19 @@ Task: Explain the discrepancies between what the user expected and what the cont
 4. Real-world implications
 
 Be direct, helpful, and avoid legalese. Use a conversational tone."""
-            
+
             chat_completion = self.client.chat.completions.create(
                 messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a helpful legal assistant who explains contract risks in simple terms."
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt,
-                    }
+                    {"role": "system", "content": "You explain contract risks in simple, careful terms. You are not a substitute for a lawyer."},
+                    {"role": "user", "content": prompt},
                 ],
                 model="llama-3.3-70b-versatile",
                 temperature=0.7,
-                max_tokens=1024
+                max_tokens=1024,
             )
             return chat_completion.choices[0].message.content
         except Exception as e:
-            print(f"❌ Groq API error: {e}")
+            print(f"Groq API error: {e}")
             return self._generate_mock_explanation(risk_data, user_explanation)
 
     def generate_negotiation_email(self, risk_data: dict) -> str:
@@ -72,103 +64,147 @@ The email should:
 2. Reference specific problematic clauses
 3. Propose fair alternatives
 4. Maintain a collaborative tone
-5. Be ready to send (include Subject line)
+5. Be ready to send and include a subject line
 
 Format as a complete email."""
-            
+
             chat_completion = self.client.chat.completions.create(
                 messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a professional contract negotiator who writes clear, firm but polite emails."
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt,
-                    }
+                    {"role": "system", "content": "You are a professional contract negotiator who writes clear, firm, polite emails."},
+                    {"role": "user", "content": prompt},
                 ],
                 model="llama-3.3-70b-versatile",
                 temperature=0.6,
-                max_tokens=800
+                max_tokens=800,
             )
             return chat_completion.choices[0].message.content
         except Exception as e:
-            print(f"❌ Groq API error: {e}")
+            print(f"Groq API error: {e}")
             return self._generate_mock_email(risk_data)
 
+    def answer_contract_question(self, question: str, analysis: dict, user_explanation: str = "") -> str:
+        """Answer follow-up questions using the user's specific analysis context."""
+        if not self.client:
+            return self._generate_mock_chat_answer(question, analysis)
+
+        try:
+            prompt = f"""Answer this follow-up question about a contract analysis.
+
+User expectation:
+{user_explanation or "Not provided"}
+
+Analysis context:
+- Safety score: {analysis.get('score')}/100
+- Contract summary: {analysis.get('contract_summary')}
+- Risks: {analysis.get('risks', [])}
+- AI assessment: {analysis.get('explanation')}
+- Negotiation draft: {analysis.get('negotiation_email')}
+
+Question:
+{question}
+
+Give a direct, practical answer in plain English. Stay grounded in the analysis context. If the user asks for legal certainty, remind them this is informational and not a substitute for a lawyer."""
+
+            chat_completion = self.client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": "You are a careful contract analysis assistant. Stay grounded in the provided analysis context."},
+                    {"role": "user", "content": prompt},
+                ],
+                model="llama-3.3-70b-versatile",
+                temperature=0.4,
+                max_tokens=700,
+            )
+            return chat_completion.choices[0].message.content
+        except Exception as e:
+            print(f"Groq API chat error: {e}")
+            return self._generate_mock_chat_answer(question, analysis)
+
     def _generate_mock_explanation(self, risk_data: dict, user_explanation: str) -> str:
-        """Generate a detailed mock explanation when Groq is unavailable"""
-        risks = risk_data.get('risks', [])
-        score = risk_data.get('score', 0)
-        
-        explanation = f"Based on my analysis, I've identified {len(risks)} significant concern(s) in this contract.\n\n"
-        
+        risks = risk_data.get("risks", [])
+        score = risk_data.get("score", 0)
+        explanation = f"Based on the contract text and your expectation, I found {len(risks)} concern(s).\n\n"
+
         if score < 50:
-            explanation += "⚠️ **Critical Issues Detected**\n\nThis contract has several red flags that could expose you to significant financial and legal risks:\n\n"
+            explanation += "**Critical issues detected**\n\nThis contract contains terms that could create significant financial or legal exposure.\n\n"
         elif score < 80:
-            explanation += "⚠️ **Moderate Concerns**\n\nWhile not terrible, this contract has some clauses that don't align with your expectations:\n\n"
+            explanation += "**Moderate concerns**\n\nThe contract may be workable, but several clauses should be clarified or negotiated.\n\n"
         else:
-            explanation += "✅ **Generally Fair Contract**\n\nThis contract is relatively balanced, but there are still a few points to consider:\n\n"
-        
+            explanation += "**Generally fair contract**\n\nThe contract looks relatively balanced, with a few points worth reviewing.\n\n"
+
         for i, risk in enumerate(risks, 1):
-            category = risk.get('category', 'Unknown')
-            finding = risk.get('finding', '')
-            severity = risk.get('severity', 'Unknown')
-            
-            explanation += f"**{i}. {category}** ({severity} Risk)\n"
-            explanation += f"{finding}\n\n"
-            
-            # Add specific advice based on category
+            category = risk.get("category", "Unknown")
+            finding = risk.get("finding", "")
+            severity = risk.get("severity", "Unknown")
+            explanation += f"**{i}. {category}** ({severity})\n{finding}\n\n"
+
             if "payment" in category.lower():
-                explanation += "💡 *Why this matters:* Extended payment terms hurt your cash flow. You'll be working for free for months while waiting to get paid. This is especially risky if the client has financial issues.\n\n"
+                explanation += "Why this matters: long payment windows can hurt cash flow and leave you financing the project.\n\n"
             elif "termination" in category.lower():
-                explanation += "💡 *Why this matters:* Without notice requirements, you could lose your income overnight with no time to find replacement work. This creates financial instability.\n\n"
+                explanation += "Why this matters: weak notice protection can cause sudden income loss or unfinished transition work.\n\n"
             elif "liability" in category.lower():
-                explanation += "💡 *Why this matters:* Unlimited liability means you could lose personal assets (house, savings) if something goes wrong. This is an unacceptable risk for most contractors.\n\n"
+                explanation += "Why this matters: uncapped liability can expose personal or business assets beyond the contract value.\n\n"
             elif "intellectual property" in category.lower() or "ip" in category.lower():
-                explanation += "💡 *Why this matters:* Losing rights to your pre-existing work means you can't reuse your own tools and methods for other clients. This limits your future earning potential.\n\n"
-        
-        explanation += "\n**Bottom Line:** "
+                explanation += "Why this matters: broad IP transfer language can limit reuse of your own tools, templates, or know-how.\n\n"
+
+        explanation += "**Bottom line:** "
         if score < 50:
-            explanation += "I strongly recommend negotiating these terms before signing. The current contract heavily favors the client and puts you at significant risk."
+            explanation += "Do not sign without negotiating the critical clauses and considering professional legal review."
         elif score < 80:
-            explanation += "You should negotiate the key issues identified above. The contract is workable but could be much fairer."
+            explanation += "Negotiate the highlighted clauses before signing so the contract matches the deal you expected."
         else:
-            explanation += "This is a reasonably fair contract. Consider the minor points above, but you're in decent shape overall."
-        
+            explanation += "You are in a better position, but still confirm the flagged details before signing."
+
         return explanation
 
     def _generate_mock_email(self, risk_data: dict) -> str:
-        """Generate a mock negotiation email when Groq is unavailable"""
-        risks = risk_data.get('risks', [])
-        
+        risks = risk_data.get("risks", [])
         email = """Subject: Contract Review - Proposed Amendments
 
 Dear [Client Name],
 
-Thank you for sending over the service agreement. I've reviewed the terms and I'm excited to work together. However, I'd like to discuss a few clauses that I believe would benefit from adjustment to create a more balanced partnership.
+Thank you for sending over the agreement. I am excited about the opportunity to work together. I reviewed the terms and would like to propose a few adjustments so the agreement reflects a balanced partnership.
 
 """
-        
-        for i, risk in enumerate(risks, 1):
-            category = risk.get('category', 'Unknown')
-            
-            if "payment" in category.lower():
-                email += f"{i}. **Payment Terms**: I noticed the payment terms are Net 90. For cash flow purposes, I'd like to propose Net 30, which is industry standard for this type of work.\n\n"
-            elif "termination" in category.lower():
-                email += f"{i}. **Termination Notice**: I'd like to request mutual 30-day termination notice. This gives both parties time to plan and ensures a smooth transition if needed.\n\n"
-            elif "liability" in category.lower():
-                email += f"{i}. **Liability Cap**: I'd like to propose capping liability at the total contract value or $[X], whichever is greater. This is standard practice and protects both parties.\n\n"
-            elif "intellectual property" in category.lower() or "ip" in category.lower():
-                email += f"{i}. **Intellectual Property**: I'd like to clarify that while you'll own the work product created for this project, I retain rights to my pre-existing tools, methods, and general knowledge.\n\n"
-        
-        email += """I believe these changes will create a more equitable agreement while still protecting your interests. I'm happy to discuss these points at your convenience.
 
-Looking forward to working together!
+        for i, risk in enumerate(risks, 1):
+            category = risk.get("category", "Unknown")
+            if "payment" in category.lower():
+                email += f"{i}. Payment Terms: I would like to adjust the payment window to Net 30, which is more practical for project cash flow.\n\n"
+            elif "termination" in category.lower():
+                email += f"{i}. Termination Notice: I would like mutual advance notice, ideally 14-30 days, to allow both parties to transition cleanly.\n\n"
+            elif "liability" in category.lower():
+                email += f"{i}. Liability Cap: I propose limiting liability to the fees paid under the agreement or another mutually agreed cap.\n\n"
+            elif "intellectual property" in category.lower() or "ip" in category.lower():
+                email += f"{i}. Intellectual Property: I would like to clarify that project deliverables transfer as agreed, while my pre-existing tools, templates, and know-how remain mine.\n\n"
+            else:
+                email += f"{i}. {category}: I would like to clarify this clause so both sides understand the scope and risk allocation.\n\n"
+
+        email += """I believe these changes protect both parties while keeping the collaboration moving forward. I am happy to discuss and align on wording.
 
 Best regards,
 [Your Name]"""
-        
         return email
+
+    def _generate_mock_chat_answer(self, question: str, analysis: dict) -> str:
+        question_lower = question.lower()
+        risks = analysis.get("risks", [])
+
+        if not risks:
+            return "I do not see specific risks in the current analysis. You can still ask about payment, termination, liability, IP ownership, or any clause you want to double-check."
+
+        matching_risks = [
+            risk for risk in risks
+            if risk.get("category", "").lower() in question_lower
+            or any(word in risk.get("finding", "").lower() for word in question_lower.split() if len(word) > 4)
+        ]
+        selected = matching_risks[:2] or risks[:2]
+
+        answer = "Based on this contract analysis, the most relevant point is:\n\n"
+        for risk in selected:
+            answer += f"- {risk.get('category')} ({risk.get('severity')}): {risk.get('finding')}\n"
+            answer += f"  Reality check: {risk.get('expectation_check', 'Review needed')}\n"
+
+        answer += "\nPractical next step: ask for narrower, clearer wording before signing. This is informational, not formal legal advice."
+        return answer
 
 llm_service = LLMService()

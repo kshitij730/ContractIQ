@@ -62,7 +62,7 @@ export function Features() {
                         color: '#94a3b8',
                         lineHeight: '1.7'
                     }}>
-                        Built for freelancers and small businesses who can't afford expensive legal reviews.
+                        Built for freelancers and small businesses who can&apos;t afford expensive legal reviews.
                     </p>
                 </motion.div>
 
