@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UploadCloud, File, X, CheckCircle2 } from "lucide-react";
+import { UploadCloud, File, X, CheckCircle2, LockKeyhole, FileText, Image as ImageIcon } from "lucide-react";
 
 interface UploadZoneProps {
     file: File | null;
@@ -16,11 +16,7 @@ export function UploadZone({ file, setFile }: UploadZoneProps) {
     const handleDrag = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        if (e.type === "dragenter" || e.type === "dragover") {
-            setIsDragging(true);
-        } else if (e.type === "dragleave") {
-            setIsDragging(false);
-        }
+        setIsDragging(e.type === "dragenter" || e.type === "dragover");
     };
 
     const handleDrop = (e: React.DragEvent) => {
@@ -50,12 +46,15 @@ export function UploadZone({ file, setFile }: UploadZoneProps) {
                         style={{
                             position: 'relative',
                             cursor: 'pointer',
-                            border: `2px dashed ${isDragging ? '#6366f1' : 'rgba(148, 163, 184, 0.2)'}`,
-                            borderRadius: '1.5rem',
-                            padding: '3rem 2rem',
+                            border: `1.5px dashed ${isDragging ? '#19c6a7' : 'rgba(255, 249, 239, 0.18)'}`,
+                            borderRadius: '1.45rem',
+                            padding: '2rem',
+                            minHeight: 310,
                             transition: 'all 0.3s ease',
-                            background: isDragging ? 'rgba(99, 102, 241, 0.05)' : 'transparent',
-                            transform: isDragging ? 'scale(1.02)' : 'scale(1)'
+                            background: isDragging
+                                ? 'linear-gradient(145deg, rgba(25,198,167,0.13), rgba(246,183,60,0.08))'
+                                : 'linear-gradient(145deg, rgba(255,249,239,0.065), rgba(255,249,239,0.025))',
+                            overflow: 'hidden'
                         }}
                         onDragEnter={handleDrag}
                         onDragLeave={handleDrag}
@@ -71,129 +70,99 @@ export function UploadZone({ file, setFile }: UploadZoneProps) {
                             accept=".pdf,.png,.jpg,.jpeg,.txt"
                         />
 
-                        <div style={{
-                            textAlign: 'center',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '1rem'
-                        }}>
-                            <div style={{
-                                width: '72px',
-                                height: '72px',
-                                borderRadius: '50%',
-                                background: 'rgba(99, 102, 241, 0.1)',
-                                border: '1px solid rgba(99, 102, 241, 0.2)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'all 0.3s ease'
-                            }}>
-                                <UploadCloud style={{
-                                    width: '36px',
-                                    height: '36px',
-                                    color: isDragging ? '#6366f1' : '#94a3b8'
-                                }} />
+                        <div style={{ position: 'absolute', top: -80, right: -70, width: 190, height: 190, borderRadius: '50%', background: 'rgba(25,198,167,0.14)', filter: 'blur(8px)' }} />
+
+                        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%', gap: '1.35rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{
+                                    width: '74px',
+                                    height: '74px',
+                                    borderRadius: '24px',
+                                    background: 'linear-gradient(135deg, rgba(25,198,167,0.22), rgba(246,183,60,0.14))',
+                                    border: '1px solid rgba(255,249,239,0.12)',
+                                    display: 'grid',
+                                    placeItems: 'center'
+                                }}>
+                                    <UploadCloud style={{ width: '34px', height: '34px', color: isDragging ? '#19c6a7' : '#fff9ef' }} />
+                                </div>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#a7b8b2', fontSize: '0.72rem', fontWeight: 800 }}>
+                                    <LockKeyhole style={{ width: 13, height: 13, color: '#19c6a7' }} />
+                                    TEMP PROCESSING
+                                </span>
                             </div>
 
                             <div>
-                                <h3 style={{
-                                    fontSize: '1.125rem',
-                                    fontWeight: '600',
-                                    marginBottom: '0.5rem',
-                                    color: '#ffffff'
-                                }}>
-                                    {isDragging ? "Drop it here!" : "Upload Contract"}
+                                <h3 style={{ fontSize: '1.55rem', marginBottom: '0.7rem', color: '#fff9ef' }}>
+                                    {isDragging ? "Release to start analysis" : "Drop your contract here"}
                                 </h3>
-                                <p style={{
-                                    fontSize: '0.875rem',
-                                    color: '#64748b',
-                                    maxWidth: '320px'
-                                }}>
-                                    Drag & drop your PDF or Image here, or click to browse
+                                <p style={{ fontSize: '0.95rem', color: '#a7b8b2', maxWidth: '390px', lineHeight: 1.7 }}>
+                                    Upload a PDF, scan, image, or text file. ContractIQ extracts the clause text and compares it against your expectations.
                                 </p>
-                                <p style={{
-                                    fontSize: '0.75rem',
-                                    color: '#475569',
-                                    marginTop: '0.5rem'
-                                }}>
-                                    Supports: PDF, PNG, JPG, TXT
-                                </p>
+                            </div>
+
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.55rem', marginTop: 'auto' }}>
+                                {[{ icon: FileText, text: 'PDF' }, { icon: ImageIcon, text: 'PNG/JPG' }, { icon: File, text: 'TXT' }].map((item) => (
+                                    <span key={item.text} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0.5rem 0.68rem', borderRadius: 999, background: 'rgba(7,16,15,0.42)', border: '1px solid rgba(255,249,239,0.09)', color: '#a7b8b2', fontSize: '0.75rem', fontWeight: 800 }}>
+                                        <item.icon style={{ width: 14, height: 14, color: '#f6b73c' }} />
+                                        {item.text}
+                                    </span>
+                                ))}
                             </div>
                         </div>
                     </motion.div>
                 ) : (
                     <motion.div
                         key="file"
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         style={{
                             width: '100%',
-                            padding: '1.5rem',
-                            background: 'rgba(99, 102, 241, 0.1)',
-                            border: '1px solid rgba(99, 102, 241, 0.3)',
-                            borderRadius: '1.5rem',
+                            padding: '1.3rem',
+                            background: 'linear-gradient(145deg, rgba(25,198,167,0.14), rgba(246,183,60,0.08))',
+                            border: '1px solid rgba(25, 198, 167, 0.28)',
+                            borderRadius: '1.35rem',
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'space-between'
+                            justifyContent: 'space-between',
+                            gap: '1rem'
                         }}
                     >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: 0 }}>
                             <div style={{
-                                width: '56px',
-                                height: '56px',
-                                borderRadius: '12px',
-                                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                boxShadow: '0 4px 14px rgba(99, 102, 241, 0.3)'
+                                width: '58px',
+                                height: '58px',
+                                borderRadius: '18px',
+                                background: 'linear-gradient(135deg, #19c6a7, #f6b73c)',
+                                display: 'grid',
+                                placeItems: 'center',
+                                boxShadow: '0 12px 30px rgba(25, 198, 167, 0.2)',
+                                flexShrink: 0
                             }}>
-                                <File style={{ width: '28px', height: '28px', color: 'white' }} />
+                                <File style={{ width: '28px', height: '28px', color: '#07100f' }} />
                             </div>
-                            <div>
-                                <p style={{
-                                    fontWeight: '600',
-                                    color: '#ffffff',
-                                    marginBottom: '0.25rem',
-                                    fontSize: '0.9375rem'
-                                }}>
+                            <div style={{ minWidth: 0 }}>
+                                <p style={{ fontWeight: 800, color: '#fff9ef', marginBottom: '0.25rem', fontSize: '0.94rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                     {file.name}
                                 </p>
-                                <p style={{
-                                    fontSize: '0.8125rem',
-                                    color: '#818cf8',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.375rem'
-                                }}>
+                                <p style={{ fontSize: '0.8rem', color: '#9ef4e4', display: 'flex', alignItems: 'center', gap: '0.38rem' }}>
                                     <CheckCircle2 style={{ width: '14px', height: '14px' }} />
-                                    Ready for analysis
+                                    Ready for clause extraction
                                 </p>
                             </div>
                         </div>
 
                         <button
                             onClick={(e) => { e.stopPropagation(); setFile(null); }}
+                            aria-label="Remove selected file"
                             style={{
-                                padding: '0.5rem',
-                                background: 'rgba(255, 255, 255, 0.1)',
-                                border: 'none',
-                                borderRadius: '8px',
+                                padding: '0.55rem',
+                                background: 'rgba(255, 249, 239, 0.08)',
+                                border: '1px solid rgba(255, 249, 239, 0.1)',
+                                borderRadius: '12px',
                                 cursor: 'pointer',
-                                color: '#94a3b8',
-                                transition: 'all 0.2s',
+                                color: '#a7b8b2',
                                 display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
-                                e.currentTarget.style.color = '#ffffff';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                                e.currentTarget.style.color = '#94a3b8';
+                                flexShrink: 0
                             }}
                         >
                             <X style={{ width: '20px', height: '20px' }} />

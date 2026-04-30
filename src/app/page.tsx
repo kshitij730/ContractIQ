@@ -163,13 +163,13 @@ export default function Home() {
                       gap: '8px',
                       padding: '6px 14px',
                       borderRadius: '9999px',
-                      background: 'rgba(99, 102, 241, 0.1)',
-                      border: '1px solid rgba(99, 102, 241, 0.2)',
+                      background: 'rgba(25, 198, 167, 0.11)',
+                      border: '1px solid rgba(25, 198, 167, 0.24)',
                       marginBottom: '1.5rem'
                     }}
                   >
-                    <Sparkles style={{ width: '14px', height: '14px', color: '#6366f1' }} />
-                    <span style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#818cf8' }}>
+                    <Sparkles style={{ width: '14px', height: '14px', color: '#19c6a7' }} />
+                    <span style={{ fontSize: '0.8125rem', fontWeight: '700', color: '#9ef4e4' }}>
                       Step 1 of 2
                     </span>
                   </motion.div>
@@ -180,15 +180,15 @@ export default function Home() {
                     marginBottom: '1rem',
                     letterSpacing: '-0.02em'
                   }}>
-                    Upload & Explain
+                    Build Your Contract Reality Check
                   </h2>
                   <p style={{
                     fontSize: '1.0625rem',
-                    color: '#94a3b8',
+                    color: '#a7b8b2',
                     maxWidth: '600px',
                     margin: '0 auto'
                   }}>
-                    Upload your contract and describe what you believe the deal is in plain English.
+                    Give ContractIQ the document and your version of the deal. We will hunt for the gaps.
                   </p>
                 </div>
 
@@ -221,7 +221,7 @@ export default function Home() {
                         width: '28px',
                         height: '28px',
                         borderRadius: '8px',
-                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                        background: 'linear-gradient(135deg, #19c6a7, #f6b73c)',
                         fontSize: '0.875rem',
                         fontWeight: '700'
                       }}>1</span>
@@ -252,7 +252,7 @@ export default function Home() {
                         width: '28px',
                         height: '28px',
                         borderRadius: '8px',
-                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                        background: 'linear-gradient(135deg, #19c6a7, #f6b73c)',
                         fontSize: '0.875rem',
                         fontWeight: '700'
                       }}>2</span>
