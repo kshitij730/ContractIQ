@@ -18,11 +18,74 @@ interface Risk {
   severity: string;
   finding: string;
   expectation_check: string;
+  confidence?: number;
+}
+
+interface LegalVerdict {
+  clause: string;
+  risk_type: string;
+  severity: string;
+  causal_chain: string;
+  confidence: number;
+  recommendation: string;
+}
+
+interface CausalAnalysis {
+  clause: string;
+  cause: string;
+  mechanism: string;
+  consequence: string;
+  legal_basis: string;
+  severity: string;
+  likelihood: number;
+  impact: number;
+}
+
+interface ClauseDebate {
+  clause: string;
+  agent_a_argument: string;
+  agent_b_argument: string;
+  agreed_risks: string[];
+  disputed_interpretations: string[];
+  risk_score: number;
+  verdict: "SIGN" | "NEGOTIATE" | "REJECT";
+  negotiation_leverage: string;
+}
+
+interface MemoryInsight {
+  clause: string;
+  clause_type: string;
+  similar_cases_found: number;
+  precedent_summary: string;
+  historical_risk_level: string;
+  winning_party_in_disputes: string;
+  recommended_modification: string;
+}
+
+interface OutcomeScenario {
+  scenario: "best" | "likely" | "worst";
+  dispute_probability: number;
+  estimated_financial_exposure_INR: number;
+  time_to_resolution_months: number;
+  key_trigger: string;
+  prevention: string;
+}
+
+interface OutcomeSimulation {
+  overall_risk_score: number;
+  go_no_go_recommendation: "SIGN" | "NEGOTIATE" | "REJECT";
+  highest_priority_clause_to_fix: string;
+  scenarios: OutcomeScenario[];
 }
 
 interface AnalysisResult {
   score: number;
   risks: Risk[];
+  legal_verdicts: LegalVerdict[];
+  causal_analyses: CausalAnalysis[];
+  clause_debates: ClauseDebate[];
+  memory_insights: MemoryInsight[];
+  outcome_simulation?: OutcomeSimulation;
   contract_summary: string;
   explanation?: string;
   negotiation_email?: string;
@@ -306,6 +369,11 @@ export default function Home() {
             <Dashboard
               score={result.score}
               risks={result.risks}
+              legalVerdicts={result.legal_verdicts || []}
+              causalAnalyses={result.causal_analyses || []}
+              clauseDebates={result.clause_debates || []}
+              memoryInsights={result.memory_insights || []}
+              outcomeSimulation={result.outcome_simulation}
               contractSummary={result.contract_summary}
               explanation={result.explanation || "No explanation available."}
               email={result.negotiation_email || "No email generated."}

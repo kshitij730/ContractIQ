@@ -5,7 +5,7 @@ import { RiskCard } from "./RiskCard";
 import { ChatBot } from "./Chatbot";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import { ExportMenu } from "./ExportMenu";
-import { Gauge, Copy, BookOpen, Send, ArrowLeft, CheckCircle2, Search, Sparkles, AlertTriangle } from "lucide-react";
+import { Gauge, Copy, BookOpen, Send, ArrowLeft, CheckCircle2, Search, Sparkles, AlertTriangle, Scale, BrainCircuit, Database, TrendingUp } from "lucide-react";
 import { useState } from "react";
 
 interface Risk {
@@ -16,9 +16,71 @@ interface Risk {
     confidence?: number;
 }
 
+interface LegalVerdict {
+    clause: string;
+    risk_type: string;
+    severity: string;
+    causal_chain: string;
+    confidence: number;
+    recommendation: string;
+}
+
+interface CausalAnalysis {
+    clause: string;
+    cause: string;
+    mechanism: string;
+    consequence: string;
+    legal_basis: string;
+    severity: string;
+    likelihood: number;
+    impact: number;
+}
+
+interface ClauseDebate {
+    clause: string;
+    agent_a_argument: string;
+    agent_b_argument: string;
+    agreed_risks: string[];
+    disputed_interpretations: string[];
+    risk_score: number;
+    verdict: "SIGN" | "NEGOTIATE" | "REJECT";
+    negotiation_leverage: string;
+}
+
+interface MemoryInsight {
+    clause: string;
+    clause_type: string;
+    similar_cases_found: number;
+    precedent_summary: string;
+    historical_risk_level: string;
+    winning_party_in_disputes: string;
+    recommended_modification: string;
+}
+
+interface OutcomeScenario {
+    scenario: "best" | "likely" | "worst";
+    dispute_probability: number;
+    estimated_financial_exposure_INR: number;
+    time_to_resolution_months: number;
+    key_trigger: string;
+    prevention: string;
+}
+
+interface OutcomeSimulation {
+    overall_risk_score: number;
+    go_no_go_recommendation: "SIGN" | "NEGOTIATE" | "REJECT";
+    highest_priority_clause_to_fix: string;
+    scenarios: OutcomeScenario[];
+}
+
 interface DashboardProps {
     score: number;
     risks: Risk[];
+    legalVerdicts: LegalVerdict[];
+    causalAnalyses: CausalAnalysis[];
+    clauseDebates: ClauseDebate[];
+    memoryInsights: MemoryInsight[];
+    outcomeSimulation?: OutcomeSimulation;
     contractSummary: string;
     explanation: string;
     email: string;
@@ -26,7 +88,7 @@ interface DashboardProps {
     onReset: () => void;
 }
 
-export function Dashboard({ score, risks, contractSummary, explanation, email, userExplanation, onReset }: DashboardProps) {
+export function Dashboard({ score, risks, legalVerdicts, causalAnalyses, clauseDebates, memoryInsights, outcomeSimulation, contractSummary, explanation, email, userExplanation, onReset }: DashboardProps) {
     const [copied, setCopied] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [filterSeverity, setFilterSeverity] = useState("all");
@@ -55,6 +117,20 @@ export function Dashboard({ score, risks, contractSummary, explanation, email, u
         const matchesSeverity = filterSeverity === "all" || risk.severity.toLowerCase() === filterSeverity.toLowerCase();
         return matchesSearch && matchesSeverity;
     });
+
+    const getVerdictColor = (severity: string) => {
+        if (severity === "critical") return "#ef4444";
+        if (severity === "high") return "#f97316";
+        if (severity === "medium") return "#f59e0b";
+        return "#19c6a7";
+    };
+
+    const formatInr = (amount: number) =>
+        new Intl.NumberFormat("en-IN", {
+            style: "currency",
+            currency: "INR",
+            maximumFractionDigits: 0,
+        }).format(amount);
 
     return (
         <div style={{
@@ -459,6 +535,274 @@ export function Dashboard({ score, risks, contractSummary, explanation, email, u
                                 </div>
                             </motion.div>
 
+                            {/* Self-Reflective Legal Verdict */}
+                            {legalVerdicts.length > 0 && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.25 }}
+                                    className="glass-panel"
+                                    style={{
+                                        padding: '2.5rem',
+                                        borderRadius: '1.5rem',
+                                        border: '1px solid rgba(25, 198, 167, 0.22)'
+                                    }}
+                                >
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '1rem',
+                                        marginBottom: '2rem',
+                                        paddingBottom: '1.5rem',
+                                        borderBottom: '1px solid rgba(148, 163, 184, 0.1)'
+                                    }}>
+                                        <div style={{
+                                            width: '48px',
+                                            height: '48px',
+                                            borderRadius: '12px',
+                                            background: 'linear-gradient(135deg, rgba(25, 198, 167, 0.2), rgba(246, 183, 60, 0.16))',
+                                            border: '1px solid rgba(25, 198, 167, 0.3)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}>
+                                            <Scale style={{ width: '24px', height: '24px', color: '#19c6a7' }} />
+                                        </div>
+                                        <div>
+                                            <h3 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.25rem' }}>
+                                                Self-Reflective Legal Verdict
+                                            </h3>
+                                            <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
+                                                Draft analysis, senior-lawyer critique, then refined JSON verdict under Indian Contract Act 1872.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        {legalVerdicts.map((verdict, index) => {
+                                            const color = getVerdictColor(verdict.severity);
+                                            const needsReview = verdict.confidence < 0.7;
+
+                                            return (
+                                                <div
+                                                    key={`${verdict.clause}-${index}`}
+                                                    style={{
+                                                        padding: '1.25rem',
+                                                        borderRadius: '1rem',
+                                                        background: 'rgba(0, 0, 0, 0.22)',
+                                                        border: `1px solid ${color}33`
+                                                    }}
+                                                >
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.85rem' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                                                            <span style={{
+                                                                padding: '0.28rem 0.55rem',
+                                                                borderRadius: '999px',
+                                                                background: `${color}1f`,
+                                                                color,
+                                                                fontSize: '0.7rem',
+                                                                fontWeight: 800,
+                                                                textTransform: 'uppercase',
+                                                                letterSpacing: '0.06em'
+                                                            }}>
+                                                                {verdict.severity}
+                                                            </span>
+                                                            <span style={{
+                                                                padding: '0.28rem 0.55rem',
+                                                                borderRadius: '999px',
+                                                                background: 'rgba(255, 249, 239, 0.06)',
+                                                                color: '#a7b8b2',
+                                                                fontSize: '0.7rem',
+                                                                fontWeight: 800,
+                                                                textTransform: 'uppercase',
+                                                                letterSpacing: '0.06em'
+                                                            }}>
+                                                                {verdict.risk_type.replace("_", " ")}
+                                                            </span>
+                                                            {needsReview && (
+                                                                <span style={{ color: '#f6b73c', fontSize: '0.75rem', fontWeight: 800 }}>
+                                                                    Human review advised
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <span style={{ color: '#a7b8b2', fontSize: '0.8rem', fontWeight: 700 }}>
+                                                            Confidence {Math.round(verdict.confidence * 100)}%
+                                                        </span>
+                                                    </div>
+
+                                                    <blockquote style={{
+                                                        margin: 0,
+                                                        padding: '0.9rem 1rem',
+                                                        borderLeft: `3px solid ${color}`,
+                                                        background: 'rgba(255, 249, 239, 0.04)',
+                                                        borderRadius: '0.75rem',
+                                                        color: '#e2e8f0',
+                                                        fontSize: '0.9rem',
+                                                        lineHeight: 1.65
+                                                    }}>
+                                                        {verdict.clause}
+                                                    </blockquote>
+
+                                                    <div style={{ display: 'grid', gap: '0.85rem', marginTop: '1rem' }}>
+                                                        <div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#fff9ef', fontSize: '0.86rem', fontWeight: 800, marginBottom: '0.35rem' }}>
+                                                                <BrainCircuit style={{ width: 15, height: 15, color }} />
+                                                                Causal chain
+                                                            </div>
+                                                            <p style={{ color: '#a7b8b2', fontSize: '0.88rem', lineHeight: 1.7, margin: 0 }}>
+                                                                {verdict.causal_chain}
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <div style={{ color: '#fff9ef', fontSize: '0.86rem', fontWeight: 800, marginBottom: '0.35rem' }}>
+                                                                Specific fix
+                                                            </div>
+                                                            <p style={{ color: '#cbd5e1', fontSize: '0.88rem', lineHeight: 1.7, margin: 0 }}>
+                                                                {verdict.recommendation}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {causalAnalyses.length > 0 && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.28 }}
+                                    className="glass-panel"
+                                    style={{ padding: '2.5rem', borderRadius: '1.5rem' }}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                                        <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(98, 215, 255, 0.14)', border: '1px solid rgba(98, 215, 255, 0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <BrainCircuit style={{ width: '22px', height: '22px', color: '#62d7ff' }} />
+                                        </div>
+                                        <div>
+                                            <h3 style={{ fontSize: '1.4rem', fontWeight: '700' }}>Causal Legal Reasoning</h3>
+                                            <p style={{ fontSize: '0.875rem', color: '#64748b' }}>Cause to legal basis, without hand-wavy warnings.</p>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        {causalAnalyses.map((item, index) => (
+                                            <div key={`${item.clause}-${index}`} style={{ padding: '1.1rem', borderRadius: '1rem', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(98, 215, 255, 0.16)' }}>
+                                                <p style={{ color: '#fff9ef', fontWeight: 700, marginBottom: '0.75rem' }}>{item.clause}</p>
+                                                <p style={{ color: '#cbd5e1', lineHeight: 1.8, margin: 0 }}>
+                                                    <strong>Cause:</strong> {item.cause}{" "}
+                                                    <strong>{"->"} Mechanism:</strong> {item.mechanism}{" "}
+                                                    <strong>{"->"} Consequence:</strong> {item.consequence}{" "}
+                                                    <strong>{"->"} Legal Basis:</strong> {item.legal_basis}
+                                                </p>
+                                                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.85rem', color: '#a7b8b2', fontSize: '0.8rem', fontWeight: 700 }}>
+                                                    <span>Severity {item.severity}</span>
+                                                    <span>Likelihood {Math.round(item.likelihood * 100)}%</span>
+                                                    <span>Impact {Math.round(item.impact * 100)}%</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {clauseDebates.length > 0 && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.31 }}
+                                    className="glass-panel"
+                                    style={{ padding: '2.5rem', borderRadius: '1.5rem' }}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                                        <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(246, 183, 60, 0.14)', border: '1px solid rgba(246, 183, 60, 0.24)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Scale style={{ width: '22px', height: '22px', color: '#f6b73c' }} />
+                                        </div>
+                                        <div>
+                                            <h3 style={{ fontSize: '1.4rem', fontWeight: '700' }}>Two-Agent Clause Debate</h3>
+                                            <p style={{ fontSize: '0.875rem', color: '#64748b' }}>Client-side defense vs exploitability attack, then a moderator verdict.</p>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        {clauseDebates.map((item, index) => (
+                                            <div key={`${item.clause}-${index}`} style={{ padding: '1.15rem', borderRadius: '1rem', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(246, 183, 60, 0.16)' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+                                                    <p style={{ color: '#fff9ef', fontWeight: 700, margin: 0 }}>{item.clause}</p>
+                                                    <span style={{ color: item.verdict === "REJECT" ? '#ef4444' : item.verdict === "NEGOTIATE" ? '#f6b73c' : '#19c6a7', fontWeight: 800 }}>
+                                                        {item.verdict} · {item.risk_score}/100
+                                                    </span>
+                                                </div>
+                                                <p style={{ color: '#cbd5e1', marginBottom: '0.55rem' }}><strong>Agent A:</strong> {item.agent_a_argument}</p>
+                                                <p style={{ color: '#cbd5e1', marginBottom: '0.55rem' }}><strong>Agent B:</strong> {item.agent_b_argument}</p>
+                                                {item.agreed_risks.length > 0 && <p style={{ color: '#a7b8b2', marginBottom: '0.45rem' }}><strong>Agreed risks:</strong> {item.agreed_risks.join("; ")}</p>}
+                                                {item.disputed_interpretations.length > 0 && <p style={{ color: '#a7b8b2', marginBottom: '0.45rem' }}><strong>Disputed points:</strong> {item.disputed_interpretations.join("; ")}</p>}
+                                                <p style={{ color: '#fff9ef', margin: 0 }}><strong>Negotiation leverage:</strong> {item.negotiation_leverage}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {(memoryInsights.length > 0 || outcomeSimulation) && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.34 }}
+                                    style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}
+                                >
+                                    {memoryInsights.length > 0 && (
+                                        <div className="glass-panel" style={{ padding: '2rem', borderRadius: '1.5rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '1rem' }}>
+                                                <Database style={{ width: '22px', height: '22px', color: '#19c6a7' }} />
+                                                <h3 style={{ fontSize: '1.2rem', fontWeight: '700' }}>Memory & Precedent Insight</h3>
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                                                {memoryInsights.map((item, index) => (
+                                                    <div key={`${item.clause}-${index}`} style={{ padding: '0.95rem', borderRadius: '1rem', background: 'rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                                                        <p style={{ color: '#fff9ef', fontWeight: 700, marginBottom: '0.4rem' }}>{item.clause_type} clause</p>
+                                                        <p style={{ color: '#cbd5e1', marginBottom: '0.4rem' }}>{item.precedent_summary}</p>
+                                                        <p style={{ color: '#a7b8b2', marginBottom: '0.35rem' }}>Cases found: {item.similar_cases_found} · Typical winner: {item.winning_party_in_disputes}</p>
+                                                        <p style={{ color: '#fff9ef', margin: 0 }}><strong>Fix:</strong> {item.recommended_modification}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {outcomeSimulation && (
+                                        <div className="glass-panel" style={{ padding: '2rem', borderRadius: '1.5rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '1rem' }}>
+                                                <TrendingUp style={{ width: '22px', height: '22px', color: '#ff6b6b' }} />
+                                                <h3 style={{ fontSize: '1.2rem', fontWeight: '700' }}>Outcome Simulation</h3>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                                                <span style={{ color: '#fff9ef', fontWeight: 800 }}>Overall {outcomeSimulation.overall_risk_score}/100</span>
+                                                <span style={{ color: outcomeSimulation.go_no_go_recommendation === "REJECT" ? '#ef4444' : outcomeSimulation.go_no_go_recommendation === "NEGOTIATE" ? '#f6b73c' : '#19c6a7', fontWeight: 800 }}>
+                                                    {outcomeSimulation.go_no_go_recommendation}
+                                                </span>
+                                            </div>
+                                            <p style={{ color: '#cbd5e1', marginBottom: '1rem' }}><strong>Top fix:</strong> {outcomeSimulation.highest_priority_clause_to_fix}</p>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                                {outcomeSimulation.scenarios.map((scenario) => (
+                                                    <div key={scenario.scenario} style={{ padding: '0.95rem', borderRadius: '1rem', background: 'rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '0.45rem' }}>
+                                                            <strong style={{ color: '#fff9ef', textTransform: 'capitalize' }}>{scenario.scenario}</strong>
+                                                            <span style={{ color: '#a7b8b2' }}>{Math.round(scenario.dispute_probability * 100)}% dispute · {scenario.time_to_resolution_months} mo</span>
+                                                        </div>
+                                                        <p style={{ color: '#cbd5e1', marginBottom: '0.35rem' }}>Exposure: {formatInr(scenario.estimated_financial_exposure_INR)}</p>
+                                                        <p style={{ color: '#cbd5e1', marginBottom: '0.35rem' }}><strong>Trigger:</strong> {scenario.key_trigger}</p>
+                                                        <p style={{ color: '#fff9ef', margin: 0 }}><strong>Prevention:</strong> {scenario.prevention}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </motion.div>
+                            )}
+
                             {/* Negotiation Email */}
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
@@ -564,6 +908,11 @@ export function Dashboard({ score, risks, contractSummary, explanation, email, u
                                 analysis={{
                                     score,
                                     risks,
+                                    legal_verdicts: legalVerdicts,
+                                    causal_analyses: causalAnalyses,
+                                    clause_debates: clauseDebates,
+                                    memory_insights: memoryInsights,
+                                    outcome_simulation: outcomeSimulation,
                                     contract_summary: contractSummary,
                                     explanation,
                                     negotiation_email: email

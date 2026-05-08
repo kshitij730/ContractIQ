@@ -23,10 +23,72 @@ interface Risk {
     confidence?: number;
 }
 
+interface LegalVerdict {
+    clause: string;
+    risk_type: string;
+    severity: string;
+    causal_chain: string;
+    confidence: number;
+    recommendation: string;
+}
+
+interface CausalAnalysis {
+    clause: string;
+    cause: string;
+    mechanism: string;
+    consequence: string;
+    legal_basis: string;
+    severity: string;
+    likelihood: number;
+    impact: number;
+}
+
+interface ClauseDebate {
+    clause: string;
+    agent_a_argument: string;
+    agent_b_argument: string;
+    agreed_risks: string[];
+    disputed_interpretations: string[];
+    risk_score: number;
+    verdict: string;
+    negotiation_leverage: string;
+}
+
+interface MemoryInsight {
+    clause: string;
+    clause_type: string;
+    similar_cases_found: number;
+    precedent_summary: string;
+    historical_risk_level: string;
+    winning_party_in_disputes: string;
+    recommended_modification: string;
+}
+
+interface OutcomeScenario {
+    scenario: string;
+    dispute_probability: number;
+    estimated_financial_exposure_INR: number;
+    time_to_resolution_months: number;
+    key_trigger: string;
+    prevention: string;
+}
+
+interface OutcomeSimulation {
+    overall_risk_score: number;
+    go_no_go_recommendation: string;
+    highest_priority_clause_to_fix: string;
+    scenarios: OutcomeScenario[];
+}
+
 interface ChatBotProps {
     analysis: {
         score: number;
         risks: Risk[];
+        legal_verdicts?: LegalVerdict[];
+        causal_analyses?: CausalAnalysis[];
+        clause_debates?: ClauseDebate[];
+        memory_insights?: MemoryInsight[];
+        outcome_simulation?: OutcomeSimulation;
         contract_summary: string;
         explanation?: string;
         negotiation_email?: string;

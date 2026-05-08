@@ -6,7 +6,18 @@ from pathlib import Path
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from fastapi.responses import FileResponse
 
-from app.schemas import AnalysisResponse, AnalysisResult, RiskItem, ChatRequest, ChatResponse
+from app.schemas import (
+    AnalysisResponse,
+    AnalysisResult,
+    RiskItem,
+    LegalVerdictItem,
+    CausalRiskItem,
+    ClauseDebateItem,
+    MemoryInsightItem,
+    OutcomeSimulationItem,
+    ChatRequest,
+    ChatResponse,
+)
 from app.services.ocr import ocr_service
 from app.services.logic import risk_engine
 from app.services.llm import llm_service
@@ -66,10 +77,20 @@ async def analyze_contract(
         risk_data = risk_engine.analyze(contract_text, user_explanation)
         explanation = llm_service.generate_explanation(risk_data, user_explanation)
         negotiation_email = llm_service.generate_negotiation_email(risk_data)
+        legal_verdicts = llm_service.generate_self_reflective_verdict(contract_text, user_explanation, risk_data)
+        causal_analyses = llm_service.generate_causal_analyses(contract_text, risk_data)
+        clause_debates = llm_service.generate_clause_debates(contract_text, risk_data)
+        memory_insights = llm_service.generate_memory_insights(contract_text, risk_data)
+        outcome_simulation = llm_service.generate_outcome_simulation(risk_data, contract_text)
 
         analysis_result = AnalysisResult(
             score=risk_data["score"],
             risks=[RiskItem(**r) for r in risk_data["risks"]],
+            legal_verdicts=[LegalVerdictItem(**v) for v in legal_verdicts],
+            causal_analyses=[CausalRiskItem(**item) for item in causal_analyses],
+            clause_debates=[ClauseDebateItem(**item) for item in clause_debates],
+            memory_insights=[MemoryInsightItem(**item) for item in memory_insights],
+            outcome_simulation=OutcomeSimulationItem(**outcome_simulation),
             contract_summary=risk_data["contract_summary"],
             explanation=explanation,
             negotiation_email=negotiation_email,

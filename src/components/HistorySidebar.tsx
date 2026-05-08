@@ -21,6 +21,56 @@ interface FullAnalysisData {
         expectation_check: string;
         confidence?: number;
     }>;
+    legal_verdicts?: Array<{
+        clause: string;
+        risk_type: string;
+        severity: string;
+        causal_chain: string;
+        confidence: number;
+        recommendation: string;
+    }>;
+    causal_analyses?: Array<{
+        clause: string;
+        cause: string;
+        mechanism: string;
+        consequence: string;
+        legal_basis: string;
+        severity: string;
+        likelihood: number;
+        impact: number;
+    }>;
+    clause_debates?: Array<{
+        clause: string;
+        agent_a_argument: string;
+        agent_b_argument: string;
+        agreed_risks: string[];
+        disputed_interpretations: string[];
+        risk_score: number;
+        verdict: string;
+        negotiation_leverage: string;
+    }>;
+    memory_insights?: Array<{
+        clause: string;
+        clause_type: string;
+        similar_cases_found: number;
+        precedent_summary: string;
+        historical_risk_level: string;
+        winning_party_in_disputes: string;
+        recommended_modification: string;
+    }>;
+    outcome_simulation?: {
+        overall_risk_score: number;
+        go_no_go_recommendation: string;
+        highest_priority_clause_to_fix: string;
+        scenarios: Array<{
+            scenario: string;
+            dispute_probability: number;
+            estimated_financial_exposure_INR: number;
+            time_to_resolution_months: number;
+            key_trigger: string;
+            prevention: string;
+        }>;
+    };
     contract_summary: string;
     explanation?: string;
     negotiation_email?: string;
