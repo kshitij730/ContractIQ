@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Send, X, Sparkles } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
 
 const SUGGESTED_QUESTIONS = [
     "What does 'Net 90' payment terms mean?",
@@ -97,6 +98,7 @@ interface ChatBotProps {
 }
 
 export function ChatBot({ analysis, userExplanation = "" }: ChatBotProps) {
+    const { token } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
         {
@@ -120,6 +122,14 @@ export function ChatBot({ analysis, userExplanation = "" }: ChatBotProps) {
         const messageText = question || input;
         if (!messageText.trim()) return;
 
+        if (!token) {
+            setMessages(prev => [...prev, {
+                role: "assistant",
+                content: "Your session has expired. Please sign in again to continue chatting."
+            }]);
+            return;
+        }
+
         setMessages(prev => [...prev, { role: "user", content: messageText }]);
         setInput("");
         setIsTyping(true);
@@ -128,7 +138,10 @@ export function ChatBot({ analysis, userExplanation = "" }: ChatBotProps) {
             const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
             const res = await fetch(`${baseUrl}/api/v1/chat`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
                 body: JSON.stringify({
                     question: messageText,
                     analysis,
@@ -155,7 +168,6 @@ export function ChatBot({ analysis, userExplanation = "" }: ChatBotProps) {
 
     return (
         <>
-            {/* Floating Chat Button */}
             <AnimatePresence>
                 {!isOpen && (
                     <motion.button
@@ -188,7 +200,6 @@ export function ChatBot({ analysis, userExplanation = "" }: ChatBotProps) {
                 )}
             </AnimatePresence>
 
-            {/* Chat Window */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -214,7 +225,6 @@ export function ChatBot({ analysis, userExplanation = "" }: ChatBotProps) {
                             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)'
                         }}
                     >
-                        {/* Header */}
                         <div style={{
                             padding: '1.5rem',
                             background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.3))',
@@ -238,7 +248,7 @@ export function ChatBot({ analysis, userExplanation = "" }: ChatBotProps) {
                                 </div>
                                 <div>
                                     <h3 style={{ fontWeight: '700', fontSize: '1.0625rem', color: '#ffffff' }}>AI Assistant</h3>
-                                    <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Ask me anything</p>
+                                    <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Secure contract workspace chat</p>
                                 </div>
                             </div>
                             <button
@@ -256,20 +266,11 @@ export function ChatBot({ analysis, userExplanation = "" }: ChatBotProps) {
                                     color: '#94a3b8',
                                     transition: 'all 0.2s'
                                 }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
-                                    e.currentTarget.style.color = '#ffffff';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                                    e.currentTarget.style.color = '#94a3b8';
-                                }}
                             >
                                 <X style={{ width: '18px', height: '18px' }} />
                             </button>
                         </div>
 
-                        {/* Messages */}
                         <div style={{
                             flex: 1,
                             overflowY: 'auto',
@@ -298,10 +299,7 @@ export function ChatBot({ analysis, userExplanation = "" }: ChatBotProps) {
                                             : 'rgba(255, 255, 255, 0.08)',
                                         color: 'white',
                                         fontSize: '0.9375rem',
-                                        lineHeight: '1.6',
-                                        boxShadow: msg.role === "user"
-                                            ? '0 4px 14px rgba(99, 102, 241, 0.3)'
-                                            : '0 2px 8px rgba(0, 0, 0, 0.2)'
+                                        lineHeight: '1.6'
                                     }}>
                                         {msg.content}
                                     </div>
@@ -309,11 +307,7 @@ export function ChatBot({ analysis, userExplanation = "" }: ChatBotProps) {
                             ))}
 
                             {isTyping && (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}
-                                >
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                     <div style={{
                                         padding: '0.875rem 1.125rem',
                                         borderRadius: '1rem',
@@ -338,7 +332,6 @@ export function ChatBot({ analysis, userExplanation = "" }: ChatBotProps) {
                                 </motion.div>
                             )}
 
-                            {/* Suggested Questions */}
                             {messages.length === 1 && (
                                 <div style={{ marginTop: '1rem' }}>
                                     <p style={{
@@ -365,14 +358,6 @@ export function ChatBot({ analysis, userExplanation = "" }: ChatBotProps) {
                                                     cursor: 'pointer',
                                                     transition: 'all 0.2s'
                                                 }}
-                                                onMouseEnter={(e) => {
-                                                    e.currentTarget.style.background = 'rgba(99, 102, 241, 0.25)';
-                                                    e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.4)';
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.currentTarget.style.background = 'rgba(99, 102, 241, 0.15)';
-                                                    e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.3)';
-                                                }}
                                             >
                                                 {q}
                                             </button>
@@ -384,7 +369,6 @@ export function ChatBot({ analysis, userExplanation = "" }: ChatBotProps) {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Input */}
                         <div style={{
                             padding: '1.25rem',
                             borderTop: '1px solid rgba(148, 163, 184, 0.1)',
@@ -395,7 +379,7 @@ export function ChatBot({ analysis, userExplanation = "" }: ChatBotProps) {
                                     type="text"
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
-                                    onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                                     placeholder="Ask a question..."
                                     className="input-field"
                                     style={{

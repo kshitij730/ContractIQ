@@ -80,29 +80,37 @@ interface HistorySidebarProps {
     isOpen: boolean;
     onClose: () => void;
     onLoadHistory: (id: string) => void;
+    userKey?: string;
 }
 
-export function HistorySidebar({ isOpen, onClose, onLoadHistory }: HistorySidebarProps) {
+const getHistoryStorageKey = (userKey?: string) => userKey ? `contractiq_history_${userKey}` : "contractiq_history";
+const getFullStorageKey = (id: string, userKey?: string) => userKey ? `contractiq_full_${userKey}_${id}` : `contractiq_full_${id}`;
+
+export function HistorySidebar({ isOpen, onClose, onLoadHistory, userKey }: HistorySidebarProps) {
     const [history, setHistory] = useState<AnalysisHistory[]>([]);
+    const historyStorageKey = getHistoryStorageKey(userKey);
 
     useEffect(() => {
-        // Load history from localStorage
-        const saved = localStorage.getItem('contractiq_history');
+        const saved = localStorage.getItem(historyStorageKey);
         if (saved) {
             queueMicrotask(() => setHistory(JSON.parse(saved)));
+        } else {
+            queueMicrotask(() => setHistory([]));
         }
-    }, [isOpen]); // Reload when side bar opens
+    }, [isOpen, historyStorageKey]);
 
     const deleteHistoryItem = (id: string) => {
         const updated = history.filter(item => item.id !== id);
         setHistory(updated);
-        localStorage.setItem('contractiq_history', JSON.stringify(updated));
+        localStorage.setItem(historyStorageKey, JSON.stringify(updated));
+        localStorage.removeItem(getFullStorageKey(id, userKey));
     };
 
     const clearAllHistory = () => {
         if (confirm('Are you sure you want to clear all history?')) {
+            history.forEach((item) => localStorage.removeItem(getFullStorageKey(item.id, userKey)));
             setHistory([]);
-            localStorage.removeItem('contractiq_history');
+            localStorage.removeItem(historyStorageKey);
         }
     };
 
@@ -123,11 +131,9 @@ export function HistorySidebar({ isOpen, onClose, onLoadHistory }: HistorySideba
 
     return (
         <>
-            {/* Sidebar */}
             <AnimatePresence>
                 {isOpen && (
                     <>
-                        {/* Backdrop */}
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -142,7 +148,6 @@ export function HistorySidebar({ isOpen, onClose, onLoadHistory }: HistorySideba
                             }}
                         />
 
-                        {/* Sidebar Panel */}
                         <motion.div
                             initial={{ x: -400 }}
                             animate={{ x: 0 }}
@@ -163,7 +168,6 @@ export function HistorySidebar({ isOpen, onClose, onLoadHistory }: HistorySideba
                                 boxShadow: '4px 0 24px rgba(0, 0, 0, 0.3)'
                             }}
                         >
-                            {/* Header */}
                             <div style={{
                                 padding: '1.5rem',
                                 borderBottom: '1px solid rgba(148, 163, 184, 0.1)',
@@ -172,7 +176,7 @@ export function HistorySidebar({ isOpen, onClose, onLoadHistory }: HistorySideba
                                 justifyContent: 'space-between'
                             }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                    <History style={{ width: '24px', height: '24px', color: '#6366f1' }} />
+                                    <History style={{ width: '24px', height: '24px', color: '#19c6a7' }} />
                                     <h2 style={{ fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>
                                         Analysis History
                                     </h2>
@@ -196,7 +200,6 @@ export function HistorySidebar({ isOpen, onClose, onLoadHistory }: HistorySideba
                                 </button>
                             </div>
 
-                            {/* History List */}
                             <div style={{
                                 flex: 1,
                                 overflowY: 'auto',
@@ -211,7 +214,7 @@ export function HistorySidebar({ isOpen, onClose, onLoadHistory }: HistorySideba
                                         <FileText style={{ width: '48px', height: '48px', margin: '0 auto 1rem', opacity: 0.5 }} />
                                         <p style={{ fontSize: '0.9375rem' }}>No analysis history yet</p>
                                         <p style={{ fontSize: '0.8125rem', marginTop: '0.5rem' }}>
-                                            Your analyzed contracts will appear here
+                                            Your protected workspace history will appear here
                                         </p>
                                     </div>
                                 ) : (
@@ -324,7 +327,6 @@ export function HistorySidebar({ isOpen, onClose, onLoadHistory }: HistorySideba
                                 )}
                             </div>
 
-                            {/* Footer */}
                             {history.length > 0 && (
                                 <div style={{
                                     padding: '1rem',
@@ -362,30 +364,31 @@ export function HistorySidebar({ isOpen, onClose, onLoadHistory }: HistorySideba
     );
 }
 
-// Helper function to save analysis to history
-export function saveToHistory(fileName: string, score: number, summary: string, fullData: FullAnalysisData) {
+export function saveToHistory(fileName: string, score: number, summary: string, fullData: FullAnalysisData, userKey?: string) {
     const id = Date.now().toString();
     const historyItem: AnalysisHistory = {
-        id: id,
+        id,
         timestamp: Date.now(),
         fileName,
         score,
         summary
     };
 
-    const existing = localStorage.getItem('contractiq_history');
+    const historyStorageKey = getHistoryStorageKey(userKey);
+    const existing = localStorage.getItem(historyStorageKey);
     const history: AnalysisHistory[] = existing ? JSON.parse(existing) : [];
-    history.unshift(historyItem); // Add to beginning
+    history.unshift(historyItem);
 
-    // Keep only last 50 items
     if (history.length > 50) {
         history.splice(50);
     }
 
-    localStorage.setItem('contractiq_history', JSON.stringify(history));
-
-    // Save the full analysis data for reloading
-    localStorage.setItem(`contractiq_full_${id}`, JSON.stringify(fullData));
+    localStorage.setItem(historyStorageKey, JSON.stringify(history));
+    localStorage.setItem(getFullStorageKey(id, userKey), JSON.stringify(fullData));
 
     return id;
+}
+
+export function getStoredAnalysis(id: string, userKey?: string) {
+    return localStorage.getItem(getFullStorageKey(id, userKey));
 }

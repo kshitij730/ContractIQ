@@ -1,13 +1,24 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Shield, Github, History, ArrowRight } from "lucide-react";
+import { Shield, Github, History, ArrowRight, LogOut, LayoutDashboard } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
 
 interface HeaderProps {
     onHistoryClick: () => void;
 }
 
 export function Header({ onHistoryClick }: HeaderProps) {
+    const router = useRouter();
+    const { user, logout, isLoading } = useAuth();
+
+    const handleLogout = () => {
+        logout();
+        router.push("/login");
+    };
+
     return (
         <motion.header
             initial={{ y: -20, opacity: 0 }}
@@ -31,7 +42,7 @@ export function Header({ onHistoryClick }: HeaderProps) {
                     height: '72px',
                     gap: '1rem'
                 }}>
-                    <a href="#" style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'inherit', textDecoration: 'none' }}>
+                    <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'inherit', textDecoration: 'none' }}>
                         <div style={{
                             width: '42px',
                             height: '42px',
@@ -51,41 +62,78 @@ export function Header({ onHistoryClick }: HeaderProps) {
                         }}>
                             Contract<span style={{ color: '#19c6a7' }}>IQ</span>
                         </span>
-                    </a>
+                    </Link>
 
                     <nav style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div className="desktop-nav" style={{ display: 'flex', gap: '1.25rem' }}>
                             <a href="#features" style={{ fontSize: '0.875rem', fontWeight: 700, color: '#a7b8b2', textDecoration: 'none' }}>Features</a>
                             <a href="#how-it-works" style={{ fontSize: '0.875rem', fontWeight: 700, color: '#a7b8b2', textDecoration: 'none' }}>Workflow</a>
+                            <a href="#security" style={{ fontSize: '0.875rem', fontWeight: 700, color: '#a7b8b2', textDecoration: 'none' }}>Security</a>
                         </div>
 
-                        <motion.button
-                            whileHover={{ y: -1 }}
-                            whileTap={{ scale: 0.97 }}
-                            onClick={onHistoryClick}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                padding: '0.68rem 0.95rem',
-                                background: 'rgba(255, 249, 239, 0.06)',
-                                border: '1px solid rgba(255, 249, 239, 0.12)',
-                                borderRadius: '999px',
-                                color: '#fff9ef',
-                                fontSize: '0.83rem',
-                                fontWeight: 800,
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <History style={{ width: '16px', height: '16px', color: '#19c6a7' }} />
-                            <span>History</span>
-                        </motion.button>
+                        {!isLoading && user ? (
+                            <>
+                                <div className="desktop-nav" style={{
+                                    padding: '0.45rem 0.8rem',
+                                    borderRadius: '999px',
+                                    background: 'rgba(25, 198, 167, 0.11)',
+                                    border: '1px solid rgba(25, 198, 167, 0.24)',
+                                    color: '#9ef4e4',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 700
+                                }}>
+                                    {user.company || user.full_name}
+                                </div>
+
+                                <motion.button
+                                    whileHover={{ y: -1 }}
+                                    whileTap={{ scale: 0.97 }}
+                                    onClick={onHistoryClick}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '0.68rem 0.95rem',
+                                        background: 'rgba(255, 249, 239, 0.06)',
+                                        border: '1px solid rgba(255, 249, 239, 0.12)',
+                                        borderRadius: '999px',
+                                        color: '#fff9ef',
+                                        fontSize: '0.83rem',
+                                        fontWeight: 800,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <History style={{ width: '16px', height: '16px', color: '#19c6a7' }} />
+                                    <span>History</span>
+                                </motion.button>
+
+                                <Link href="/" className="btn btn-secondary" style={{ fontSize: '0.83rem', padding: '0.68rem 0.95rem', borderRadius: '999px' }}>
+                                    <LayoutDashboard style={{ width: '16px', height: '16px' }} />
+                                    <span>Workspace</span>
+                                </Link>
+
+                                <button onClick={handleLogout} className="btn btn-secondary" style={{ fontSize: '0.83rem', padding: '0.68rem 0.95rem', borderRadius: '999px' }}>
+                                    <LogOut style={{ width: '16px', height: '16px' }} />
+                                    <span>Logout</span>
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link href="/login" className="btn btn-secondary" style={{ fontSize: '0.83rem', padding: '0.68rem 0.95rem', borderRadius: '999px' }}>
+                                    <span>Login</span>
+                                </Link>
+                                <Link href="/signup" className="btn btn-primary" style={{ fontSize: '0.83rem', padding: '0.68rem 0.95rem', borderRadius: '999px' }}>
+                                    <span>Start Free</span>
+                                    <ArrowRight style={{ width: '14px', height: '14px' }} />
+                                </Link>
+                            </>
+                        )}
 
                         <a
                             href="https://github.com/kshitij730/ContractIQ"
                             target="_blank"
                             rel="noreferrer"
-                            className="btn btn-secondary"
+                            className="btn btn-secondary desktop-nav"
                             style={{ fontSize: '0.83rem', padding: '0.68rem 0.95rem', borderRadius: '999px' }}
                         >
                             <Github style={{ width: '16px', height: '16px' }} />

@@ -35,6 +35,12 @@ venv.bak/
 .env.test.local
 .env.production.local
 
+# Local databases / generated caches
+*.db
+*.sqlite
+*.sqlite3
+tsconfig.tsbuildinfo
+
 # Node / Frontend
 node_modules/
 frontend/node_modules/

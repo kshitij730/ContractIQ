@@ -1,26 +1,27 @@
-﻿import json
-import os
+import json
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
+from app.auth import get_current_active_user
+from app.models.user import User
 from app.schemas import (
     AnalysisResponse,
     AnalysisResult,
-    RiskItem,
-    LegalVerdictItem,
     CausalRiskItem,
-    ClauseDebateItem,
-    MemoryInsightItem,
-    OutcomeSimulationItem,
     ChatRequest,
     ChatResponse,
+    ClauseDebateItem,
+    LegalVerdictItem,
+    MemoryInsightItem,
+    OutcomeSimulationItem,
+    RiskItem,
 )
-from app.services.ocr import ocr_service
-from app.services.logic import risk_engine
 from app.services.llm import llm_service
+from app.services.logic import risk_engine
+from app.services.ocr import ocr_service
 from app.services.report_generator import generate_pdf_report
 from app.core.config import settings
 
@@ -61,6 +62,7 @@ async def _save_upload(file: UploadFile, destination: Path) -> None:
 async def analyze_contract(
     file: UploadFile = File(...),
     user_explanation: str = Form(...),
+    current_user: User = Depends(get_current_active_user),
 ):
     file_path = _safe_upload_path(file.filename)
 
@@ -106,7 +108,10 @@ async def analyze_contract(
 
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat_with_contract(payload: ChatRequest):
+async def chat_with_contract(
+    payload: ChatRequest,
+    current_user: User = Depends(get_current_active_user),
+):
     question = payload.question.strip()
     if not question:
         raise HTTPException(status_code=400, detail="Question is required.")
@@ -125,13 +130,14 @@ async def download_report(
     risks: str = Form(...),
     explanation: str = Form(...),
     email: str = Form(...),
+    current_user: User = Depends(get_current_active_user),
 ):
     try:
         parsed_risks = json.loads(risks)
         if not isinstance(parsed_risks, list):
             raise ValueError("risks must be a list")
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid risks payload.")
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="Invalid risks payload.") from exc
 
     pdf_path = generate_pdf_report(score, parsed_risks, explanation, email)
     return FileResponse(

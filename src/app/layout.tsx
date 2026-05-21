@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
-  title: "ContractIQ - AI Discrepancy Detector",
-  description: "Detect contract risks and negotiate with confidence.",
+  title: "ContractIQ | Secure AI Contract Intelligence",
+  description: "Protected contract review, legal risk analysis, and negotiation workflows for sellable legal-tech products.",
 };
 
 export default function RootLayout({
@@ -14,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

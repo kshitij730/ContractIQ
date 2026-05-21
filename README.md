@@ -244,6 +244,16 @@ Create a `backend/.env` file:
 
 ```env
 GROQ_API_KEY=your_groq_api_key_here
+SECRET_KEY=replace_with_a_long_random_secret
+DATABASE_URL=sqlite:///./contractiq.db
+CORS_ORIGINS=http://localhost:3000,https://contract-iq-xi.vercel.app
+ACCESS_TOKEN_EXPIRE_MINUTES=720
+```
+
+Create a frontend `.env.local` file when your backend is not running on the default local URL:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
 If you are running optional retrieval, vector memory, or external deployment layers later, add those separately based on your deployment setup.
@@ -317,12 +327,27 @@ This makes the platform suitable for:
 
 ContractIQ is built with a privacy-first direction:
 
+- login and signup are backed by JWT authentication
+- contract analysis, chat, and PDF export routes are protected
+- backend CORS origins are environment-driven instead of open by default
+- frontend and backend send security headers for safer browser behavior
 - uploaded files are processed temporarily
-- local history is stored in the browser
+- local history is scoped to the signed-in user in the browser
 - contract analysis is geared toward minimizing long-term file retention
 - file validation and upload limits reduce unsafe input handling
 
 That said, this is still an AI-assisted review tool, not a substitute for licensed legal advice in high-stakes matters.
+
+## DevSecOps Baseline
+
+The repository includes a first production-readiness layer:
+
+- GitHub Actions CI for frontend lint/build and backend compile checks
+- CodeQL scanning for Python and TypeScript
+- scheduled security workflow with Bandit, pip-audit, and npm audit
+- Dependabot updates for npm, pip, and GitHub Actions
+- `SECURITY.md` for vulnerability reporting
+- environment examples for local and deployed setups
 
 ## Current Strengths
 
@@ -338,7 +363,7 @@ That said, this is still an AI-assisted review tool, not a substitute for licens
 - clause redlining suggestions inline in the document
 - multi-contract comparison workspace
 - team collaboration and shared report links
-- auth, billing, and organization-level history
+- billing, usage limits, and organization-level history
 
 ## Disclaimer
 
