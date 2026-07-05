@@ -12,7 +12,7 @@ faiss-cpu
 scikit-learn
 groq
 pydantic-settings
-python-jose[cryptography]>=3.5.1
+python-jose[cryptography]
 passlib[bcrypt]
 transformers>=5.9.1
 torch>=2.12.1
