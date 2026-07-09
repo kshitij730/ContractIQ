@@ -15,7 +15,7 @@ pydantic-settings
 python-jose[cryptography]
 passlib[bcrypt]
 transformers>=5.9.1
-torch>=2.12.1
+torch>=2.13.0
 torchvision
 torchaudio
 shap
