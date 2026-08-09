@@ -1,5 +1,4 @@
 name: Security
-
 on:
   push:
     branches: [main]
@@ -12,9 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Validate workflow syntax
+        uses: rhysd/actionlint@v1
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.11.5'
       - uses: actions/setup-node@v4
         with:
           node-version: 20
